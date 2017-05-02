@@ -3,12 +3,19 @@
 ​															stevegao(高家华)
 
 ***
+# 前言
+
+- 什么是性能分析
+- python性能分析的重不重要
+- 性能分析都分析哪些方面
+
 #1. 运行时间
+
 ##1.1 Shell 命令time
 - test_shell_time0.py
 ```python
 rs = 0
-for i in range(100*100):
+for i in xrange(100*100):
     rs += i
 print rs
 ```
@@ -101,7 +108,9 @@ filename:lineno(function)：每个函数调用的具体信息；
 
   可能的失败情况：
 
-  ![](pics\pip_line_profiler.png)
+```shell
+error: Microsoft Visual C++ 9.0 is required
+```
 
   Windows下，依赖VS编译，可以调整环境变量
 ```shell
@@ -137,7 +146,12 @@ python  kernprof.py   -l  -v  xxx.py
 ```
 - 效果
   ![line_profiler](pics\line_profiler.png)
+## 1.5 python模块timeit
+
+//todo timeit
+
 #2. 内存占用
+
 ##2.1 内存占用memory_profiler
 现在机器学习和深度学习很火热，很多学习任务比较吃内存，memory_profiler这种场景下可以起到一定作用
 

@@ -30,12 +30,17 @@
 ##2. 使用效率更高的语法
 - 字符串连接
 - range和xrange
-- 使用列表生成
-##3. 可视化工具与日志分析
-- Runsnakerun
-
-- pycallgraph
-
+- 推导式
+- 循环优化
+- 生成器
+##3. python脚本运行方式
+- Cython
+- Pypy
+#三. python 性能优化实践
+##1. 真假多线程
+##2. json解析
+##3. url中提取域名
+##4. simhash算法
 ***
 
 ***
