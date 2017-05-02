@@ -3,7 +3,7 @@
 ​															stevegao(高家华)
 
 ***
-#1 运行时间
+#1. 运行时间
 ##1.1 Shell 命令time
 - test_shell_time0.py
 ```python
@@ -137,7 +137,7 @@ python  kernprof.py   -l  -v  xxx.py
 ```
 - 效果
   ![line_profiler](pics\line_profiler.png)
-#2 内存占用
+#2. 内存占用
 ##2.1 内存占用memory_profiler
 现在机器学习和深度学习很火热，很多学习任务比较吃内存，memory_profiler这种场景下可以起到一定作用
 
@@ -185,13 +185,13 @@ if __name__ == '__main__':
 ***
 	#显示距离上次执行此命令之间生成的对象
 	objgraph.show_growth()
-#3 可视化工具与日志分析
+#3. 可视化工具与日志分析
 ##3.1 log分析Runsnakerun
 
 -安装
 依赖wxpython
 可以直接在网页上下载安装包,这里介绍下choco下的安装：
-+   安装choco
++ 安装choco
 
     安装powshell，然后在cmd命令下输入下边的命令
 ```shell
