@@ -141,7 +141,7 @@ Python-2.7.9-src\Python\bltinmodule.c   ->  builtin_range
 
 下面来看xrange，在python中调用xrange会创建下边这个结构体
 
-Python-2.7.9-src\Objects\rangeobject.c(下列三幅图，都来自此文件)
+Python-2.7.9-src\Objects\rangeobject.c (下列三幅图，都来自此文件)
 
 ![](pics\xrange_struct.png)
 
@@ -194,7 +194,19 @@ S = {len(s) for s in strings}
 >>>S
 set([1, 2, 4, 9])#set 没有重复项
 ```
+- ### 原因分析
+
+  之前的几次性能分析都是使用源码和调试的方式，这次换一种分析方式，字节码比较。
+
+  ```python
+  python -m dis xxx.py
+  ```
+
+​      ![](pics\list_append.png)
+
+​       ![](pics\list_comprehension.png) 
 ##2.4 循环优化
+
 - ### 一般写法
 ```python
 for x in xrange(0, 100):
