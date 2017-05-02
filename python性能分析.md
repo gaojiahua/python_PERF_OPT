@@ -98,11 +98,18 @@ filename:lineno(function)：每个函数调用的具体信息；
 ##1.4 Python第三方模块line_profiler
 - 安装
   使用pip安装，linux直接pip  install  line_profiler
-  Windows下依赖IPython，依赖VS编译，可能需要调整环境变量
+
+  可能的失败情况：
+
+  ![](pics\pip_line_profiler.png)
+
+  Windows下，依赖VS编译，可以调整环境变量
 ```shell
   VS90COMNTOOLS
-  C:\Program Files (x86)\Microsoft Visual Studio 11.0\Common7\Tools 
+  #系统中的VS安装路径
+  C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\Tools 
 ```
+  或者访问 http://aka.ms/vcpython27 去下载编译支持包
 - 使用
 
 (1) 修改源代码, 待测试函数上增加@profile
@@ -132,16 +139,29 @@ python  kernprof.py   -l  -v  xxx.py
   ![line_profiler](pics\line_profiler.png)
 #2 内存占用
 ##2.1 内存占用memory_profiler
-现在机器学习和深度学习很火热，很多学习任务比较迟内存，memory_profiler这种场景下可以起到一定作用
+现在机器学习和深度学习很火热，很多学习任务比较吃内存，memory_profiler这种场景下可以起到一定作用
+
+- 安装
+```python
+pip install memory_profiler
+```
+- 使用
+
 ```python
 python -m memory_profiler memory_profiler_test.py
 ```
 ![](pics\memory_profiler.png)
 ##2.2 内存泄漏objgraph
-python可能出现的内存泄露：
-(1)所用到的用 C 语言开发的底层模块中出现了内存泄露
-(2)代码中用到了全局的 list、 dict 或其它容器，不停的往这些容器中插入对象，而忘记了在使用完之后进行删除回收
-(3)代码中有“引用循环”
+- 安装
+
+  ```PYTHON
+  pip install objgraph
+  ```
+- python可能出现的内存泄露：
+  (1)所用到的用 C 语言开发的底层模块中出现了内存泄露
+  (2)代码中用到了全局的 list、 dict 或其它容器，不停的往这些容器中插入对象，而忘记了在使用完之后进行删除回收
+  (3)代码中有“引用循环”
+
 ```python
 #memLeak.py
 #import pdb
@@ -168,9 +188,20 @@ if __name__ == '__main__':
 #3 可视化工具与日志分析
 ##3.1 log分析Runsnakerun
 
-安装过程略(依赖wxpython)
+-安装
+依赖wxpython
+可以直接在网页上下载安装包,这里介绍下choco下的安装：
++   安装choco
 
-	python  runsnake.py  result.prf
+    安装powshell，然后在cmd命令下输入下边的命令
+```shell
+  @powershell -NoProfile -ExecutionPolicy Bypass -Command "iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))" && SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"
+```
+```shell
+choco install wxpython
+```
+- 使用
+  python  runsnake.py  result.prf
 ##3.2 可视化工具pycallgraph
 
 安装过程略(依赖graphviz)
