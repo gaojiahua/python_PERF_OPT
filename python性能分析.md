@@ -126,7 +126,7 @@ timeit.timeit("x = range(100)")
 
 ##1.4 Python默认性能分析器cProfile
 
-cProfile自Python 2.5以来就是标准版Python解释器默认的性能分析器，测量CPU，统计函数调用次数，不关心内存相关信息。尽管如此，它是性能优化过程中一个近似于标准化的起点，绝大多数时候这个分析工具都可以快速为我们提供一组优化方案。
+cProfile自Python 2.5以来就是标准版Python解释器默认的性能分析器，测量CPU，统计函数调用次数，不关心内存相关信息。尽管如此，它是性能优化过程中一个近似于标准化的起点，绝大多数时候这个都能为我们的分析工作提供有力支持。
 
 - 在py代码中使用
 
@@ -161,6 +161,7 @@ python -m cProfile -s tottime python_time_test0.py
 ***
 
 ##1.5 第三方性能分析器line_profiler
+核心就在于line这个单词，这个性能分析器和cProfile不同。它可以帮助你一行一行地分析函数性能。cProfile主要关注函数的性能，如果你的程序性能瓶颈出现在某一行python代码中，line_profiler显得非常恰当。
 - 安装
   使用pip安装，linux直接pip  install  line_profiler
 
@@ -177,9 +178,9 @@ error: Microsoft Visual C++ 9.0 is required
   C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\Tools 
 ```
   或者访问 http://aka.ms/vcpython27 去下载编译支持包
-- 使用
+- 使用：line_profiler的作者建议使用其中的kernprof工具，下边的介绍也是基于kernprof的
 
-(1) 修改源代码, 待测试函数上增加@profile
+(1) 修改源代码, 待测试函数上增加@profile  #####todo python 装饰器
 
 ```python
 #line_profiler_test.py
@@ -220,7 +221,7 @@ pip install memory_profiler
 python -m memory_profiler memory_profiler_test.py
 ```
 ![](pics\memory_profiler.png)
-##2.2 内存泄漏objgraph
+##2.2 “内存泄漏”objgraph
 - 安装
 
   ```PYTHON
