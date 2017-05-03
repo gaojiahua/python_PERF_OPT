@@ -6,12 +6,27 @@
 # 前言
 
 - 什么是性能分析
+
 - python性能分析的重不重要
-- 性能分析都分析哪些方面
+
+
 
 #1. 运行时间
+- 运行时间复杂度
+
+  | 名称     | 复杂度       | 算法举例         |
+  | ------ | :-------- | :----------- |
+  | 常数时间   | O(1)      | 判断一个数是基数还是偶数 |
+  | 对数时间   | O(logn)   | 二分查找         |
+  | 线性时间   | O(n)      | 查找无序列表的最小元素  |
+  | 线性对数时间 | O(n logn) | 快速排序(平均时间)   |
+  | 平方时间   | O(n2)     | 插入排序         |
 
 ##1.1 Shell 命令time
+linux shell  time命令常用于测量一个命令的运行时间，注意不是用来显示和修改系统时间的，不仅仅用于python其他命令也可以测试。
+
+![](pics\time_ls.png)
+
 - test_shell_time0.py
 ```python
 rs = 0
@@ -27,7 +42,12 @@ from time import *
 sleep(2)
 ```
 ![](pics\time1.png)
+- 一点结论
+  + real != user + sys
+  + real 和 user + sys的值越接近，证明程序越重计算，反之说明程序更重IO
+
 ##1.2 Python自带模块time
+
 time. time() 返回当前时间的时间戳（1970纪元后经过的浮点秒数）
 - time_demo.py  
 >time函数的作用
@@ -82,7 +102,52 @@ with Timer() as t:
    print rdb.lpop("foo")
 print "=> elasped lpop: %s s" % t.secs
 ```
-##1.3 Python自带模块cProfile
+## 1.3 python模块timeit
+
+测量一段代码的运行时间，在python内可以直接使用timeit。
+
+```python
+import timeit
+timeit.timeit("x = range(100)")
+```
+***
+```pypthon
+0.6274833867336724
+```
+
+为什么x = range(100)的耗时会这么高，默认循环1000000次。
+
+	default_number = 1000000
+***
+**上边讲的三种方法都比较简单，适合做粗略统计，下面讲两个性能分析器**
+
+***
+
+
+##1.4 Python默认性能分析器cProfile
+
+cProfile自Python 2.5以来就是标准版Python解释器默认的性能分析器，测量CPU，统计函数调用次数，不关心内存相关信息。尽管如此，它是性能优化过程中一个近似于标准化的起点，绝大多数时候这个分析工具都可以快速为我们提供一组优化方案。
+
+- 在py代码中使用
+
+```python
+#cprofiler_inpy.py
+import cProfile
+import re
+cProfile.run('re.compile("foo|bar")')
+```
+***
+>结果太长，实际演示
+```shell
+ncalls：表示函数调用的次数；
+tottime：表示指定函数的总的运行时间，除掉函数中调用子函数的运行时间；
+percall：（第一个percall）等于 tottime/ncalls；
+cumtime：表示该函数及其所有子函数的调用运行的时间，即函数开始调用到返回的时间；
+percall：（第二个percall）即函数运行一次的平均时间，等于 cumtime/ncalls；
+filename:lineno(function)：每个函数调用的具体信息；
+```
+**tips：原生（primitive）调用，表明这些调用不涉及递归**
+- 在命令行使用
 ```python
 # 直接把分析结果打印到控制台
 python -m cProfile python_time_test0.py
@@ -94,19 +159,12 @@ python -m cProfile -s tottime python_time_test0.py
 ***
 ![](pics\cProfile.png)
 ***
-```shell
-ncalls：表示函数调用的次数；
-tottime：表示指定函数的总的运行时间，除掉函数中调用子函数的运行时间；
-percall：（第一个percall）等于 tottime/ncalls；
-cumtime：表示该函数及其所有子函数的调用运行的时间，即函数开始调用到返回的时间；
-percall：（第二个percall）即函数运行一次的平均时间，等于 cumtime/ncalls；
-filename:lineno(function)：每个函数调用的具体信息；
-```
-##1.4 Python第三方模块line_profiler
+
+##1.5 第三方性能分析器line_profiler
 - 安装
   使用pip安装，linux直接pip  install  line_profiler
 
-  可能的失败情况：
+  windows下pip安装，可能的失败情况：
 
 ```shell
 error: Microsoft Visual C++ 9.0 is required
@@ -146,9 +204,6 @@ python  kernprof.py   -l  -v  xxx.py
 ```
 - 效果
   ![line_profiler](pics\line_profiler.png)
-## 1.5 python模块timeit
-
-//todo timeit
 
 #2. 内存占用
 
