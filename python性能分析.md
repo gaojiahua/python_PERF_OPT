@@ -3,28 +3,37 @@
 ​															stevegao(高家华)
 
 ***
-#**背景知识**
-##适合
+ > #*课程介绍*
+ 1. Python性能分析
+ 2. Python性能优化的技巧
+ 3. Python性能优化实践
+ > #*背景知识*
+
+
+
+> ##适合
 - 写过一点python
 - 思考python的性能问题
 - 有python性能优化需求
 - 想写出性能更好的python代码
-##不适合
+> ##不适合
 - 不是一门python编程入门，从来没写过python的人不适合
 - python初级偏中级一点的课程，python老鸟不适合
 - 对比课程的章节目，如果对涉及到的技术点都了解，也不适合这个课程
 ***
-# 前言
+ > # *概述*
 
 - 什么是性能分析
-
-- python性能分析的重不重要
+- 性能分析的一般过程
+  + 程序运行的速度如何
+  + 时间瓶颈在哪里/内存瓶颈在哪里
+  + 性能瓶颈的改进方案
 
 ***
 
-# 正文：
+> # *正文：*
 ***
-#1. 运行时间
+#1. 运行时间分析
 - 运行时间复杂度
 
   | 名称     | 复杂度       | 算法举例         |
@@ -33,15 +42,17 @@
   | 对数时间   | O(logn)   | 二分查找         |
   | 线性时间   | O(n)      | 查找无序列表的最小元素  |
   | 线性对数时间 | O(n logn) | 快速排序(平均时间)   |
-  | 平方时间   | O(n2)     | 插入排序         |
+  | 平方时间   | O(n**2)   | 冒泡排序         |
 
 ##1.1 Shell 命令time
-linux shell  time命令常用于测量一个命令的运行时间，注意不是用来显示和修改系统时间的，不仅仅用于python其他命令也可以测试。
+linux shell  time命令常用于测量一个命令的运行时间，注意不是用来显示和修改系统时间的，不仅仅用于python。
 
 ![](pics\time_ls.png)
 
-- test_shell_time0.py
+
+
 ```python
+#test_shell_time0.py
 rs = 0
 for i in xrange(100*100):
     rs += i
@@ -49,8 +60,10 @@ print rs
 ```
 ![](pics\time0.png)
 
-- test_shell_time1.py
+
+
 ```python
+#test_shell_time1.py
 from time import *
 sleep(2)
 ```
@@ -219,9 +232,9 @@ python  kernprof.py   -l  -v  xxx.py
 - 效果
   ![line_profiler](pics\line_profiler.png)
 
-#2. 内存占用
+#2. 内存分析
 
-##2.1 内存占用memory_profiler
+##2.1 内存占用变化memory_profiler
 现在机器学习和深度学习很火热，很多学习任务比较吃内存，memory_profiler这种场景下可以起到一定作用
 
 - 安装
@@ -233,32 +246,57 @@ pip install memory_profiler
 ```python
 python -m memory_profiler memory_profiler_test.py
 ```
-![](pics\memory_profiler.png)
-##2.2 “内存泄漏”objgraph
+- 效果
+  ![](pics\memory_profiler.png)
+##2.2 ”内存泄漏“objgraph
+
+
 - 安装
 
   ```PYTHON
   pip install objgraph
   ```
-- python可能出现的内存泄露：
-  (1)所用到的用 C 语言开发的底层模块中出现了内存泄露
+  ​
+
+  > 首先明确一个点，python中的内存问题相比于C和C++少很多。
+  >
+  > C或者C++内存管理由开发者负责，Python中内存管理是由Python解释器负责，所以开发人员从内存事务中解脱出来，使得错误更少，程序更健壮，开发周期更短。
+
++ Python 垃圾回收算法：
+
+  - 引用计数
+  - 标记清除
+  - 分代回收
+
+- python可能出现的内存泄漏：
+  (1)所用到的用 C 语言开发的底层模块中出现了内存泄漏
+
   (2)代码中用到了全局的 list、 dict 或其它容器，不停的往这些容器中插入对象，而忘记了在使用完之后进行删除回收
-  (3)代码中有“引用循环”
+
+- 借助pdb调试，常用的pdb命令
+
+  p(print) 查看一个变量值 
+  n(next) 下一步
+  s(step) 单步,可进入函数
+  c(continue)继续前进
+  l(list)看源代码
+
+
 
 ```python
 #memLeak.py
-#import pdb
+import pdb
 class MyBigFatObject(object):
 	def __init__(self):
 		self.data =  [2] * (2 * 10 ** 7)
 
 def computate_something(_cache={}):
-	_cache[42] = dict(foo=MyBigFatObject(),
+	_cache["default"] = dict(foo=MyBigFatObject(),
 	                  bar=MyBigFatObject())
 	x = MyBigFatObject()
-@profile
+
 def test():
-	#pdb.set_trace()
+	pdb.set_trace()
 	print "b"
 	computate_something()
 	print "f"	
@@ -268,7 +306,7 @@ if __name__ == '__main__':
 ***
 	#显示距离上次执行此命令之间生成的对象
 	objgraph.show_growth()
-#3. 可视化工具与日志分析
+#3. 可视化工具
 ##3.1 log分析Runsnakerun
 
 -安装

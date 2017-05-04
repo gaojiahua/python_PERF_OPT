@@ -218,7 +218,7 @@ for x in xrange(0, 100):
 ```python
 map(doSomethingWithX, xrange(0,100))
 ```
-##2.5 生成器
+##2.5 //todo生成器
 //TODO
 #3. python脚本运行方式
 
