@@ -47,6 +47,14 @@
 ##1.1 Shell 命令time
 linux shell  time命令常用于测量一个命令的运行时间，注意不是用来显示和修改系统时间的，不仅仅用于python。
 
+windows下使用：
+
+
+1. 虚拟机
+2. **Cygwin这样的模拟环境**
+3. git bash
+
+
 ![](pics\time_ls.png)
 
 
@@ -74,21 +82,23 @@ sleep(2)
 
 ##1.2 Python自带模块time
 
-time. time() 返回当前时间的时间戳（1970纪元后经过的浮点秒数）
-- time_demo.py  
->time函数的作用
+- time函数的功能
+
 ```python
+#time_demo.py  
 import time
 print time.time()
 print time.asctime( time.localtime(time.time()) )
 print time.asctime( time.localtime(0) )
 ```
+time. time() 返回当前时间的时间戳（1970纪元后经过的浮点秒数）
 ***
     1493454752.49
     Sat Apr 29 16:32:32 2017
     Thu Jan 01 08:00:00 1970
 - time.time()的简单应用
 ```python
+import time
 t0 = time.time()
 doSomething()
 t1 = time.time()
@@ -128,6 +138,8 @@ with Timer() as t:
    print rdb.lpop("foo")
 print "=> elasped lpop: %s s" % t.secs
 ```
+顺便说一个time模块下的clock()函数，windows下推荐用time.clock代替time.time
+
 ## 1.3 python模块timeit
 
 测量一段代码的运行时间，在python内可以直接使用timeit。
@@ -141,7 +153,7 @@ timeit.timeit("x = range(100)")
 0.6274833867336724
 ```
 
-为什么x = range(100)的耗时会这么高，默认循环1000000次。
+为什么x = range(100)的耗时会这么高？
 
 	default_number = 1000000
 ***
@@ -152,7 +164,7 @@ timeit.timeit("x = range(100)")
 
 ##1.4 Python默认性能分析器cProfile
 
-cProfile自Python 2.5以来就是标准版Python解释器默认的性能分析器，测量CPU，统计函数调用次数，不关心内存相关信息。尽管如此，它是性能优化过程中一个近似于标准化的起点，绝大多数时候这个都能为我们的分析工作提供有力支持。
+cProfile自Python 2.5以来就是标准版Python解释器默认的性能分析器，测量CPU运行时间，统计函数调用次数，不关心内存相关信息。尽管如此，它是性能优化过程中一个近似于标准化的起点，绝大多数时候这个都能为我们的分析工作提供有力支持。
 
 - 在py代码中使用
 
@@ -160,7 +172,10 @@ cProfile自Python 2.5以来就是标准版Python解释器默认的性能分析�
 #cprofiler_inpy.py
 import cProfile
 import re
-cProfile.run('re.compile("foo|bar")')
+def test():
+	for i in xrange(10**6):
+		re.compile("foo|bar")	
+cProfile.run('test()')
 ```
 ***
 >结果太长，实际演示
@@ -174,6 +189,8 @@ filename:lineno(function)：每个函数调用的具体信息；
 ```
 **tips：原生（primitive）调用，表明这些调用不涉及递归**
 - 在命令行使用
+
+  使用的Python脚本就是刚才在讲time模块的时候Redis的例子
 ```python
 # 直接把分析结果打印到控制台
 python -m cProfile python_time_test0.py
@@ -206,7 +223,7 @@ error: Microsoft Visual C++ 9.0 is required
   或者访问 http://aka.ms/vcpython27 去下载编译支持包
 - 使用：line_profiler的作者建议使用其中的kernprof工具，下边的介绍也是基于kernprof的
 
-(1) 修改源代码, 待测试函数上增加@profile  #####todo python 装饰器
+(1) 修改源代码, 待测试函数上增加@profile   
 
 ```python
 #line_profiler_test.py
@@ -223,7 +240,7 @@ if __name__ == "__main__":
 
 ```python
 
-python  kernprof.py   -l  -v  xxx.py
+python  kernprof.py   -l  -v  line_profiler_test.py
 
 #-l 选项通知kernprof注入@profile装饰器
 

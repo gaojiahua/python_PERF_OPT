@@ -1,3 +1,6 @@
 import cProfile
 import re
-cProfile.run('re.compile("foo|bar")')
+def test():
+	for i in xrange(10**6):
+		re.compile("foo|bar")	
+cProfile.run('test()')
