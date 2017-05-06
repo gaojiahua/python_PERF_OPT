@@ -11,15 +11,19 @@
 
 
 
-> ##适合
+> ###*适合*
 - 写过一点python
 - 思考python的性能问题
 - 有python性能优化需求
 - 想写出性能更好的python代码
-> ##不适合
+> ###*不适合*
 - 不是一门python编程入门，从来没写过python的人不适合
+
 - python初级偏中级一点的课程，python老鸟不适合
+
 - 对比课程的章节目，如果对涉及到的技术点都了解，也不适合这个课程
+
+> # *目录介绍*
 ***
  > # *概述*
 
@@ -105,6 +109,8 @@ t1 = time.time()
 print t1 - t0
 ```
 - time.time()的封装使用
+
+  \_enter\_和\_exit\_配合with关键字使用
 ```python
 #timer.py
 import time
@@ -131,14 +137,16 @@ from redis import Redis
 rdb = Redis()
 
 with Timer() as t:
-    rdb.lpush("foo", "bar")
+	rdb.lpush("foo", "bar")
 print "=> elasped lpush: %s s" % t.secs
 
 with Timer() as t:
-   print rdb.lpop("foo")
+	print rdb.lpop("foo")
 print "=> elasped lpop: %s s" % t.secs
 ```
-顺便说一个time模块下的clock()函数，windows下推荐用time.clock代替time.time
+> ##结果演示
+
+windows下推荐用time.clock代替time.time，更精确
 
 ## 1.3 python模块timeit
 
@@ -153,7 +161,7 @@ timeit.timeit("x = range(100)")
 0.6274833867336724
 ```
 
-为什么x = range(100)的耗时会这么高？
+大家觉得上边这行代码执行0.6s时间消耗高不高
 
 	default_number = 1000000
 ***
@@ -178,7 +186,7 @@ def test():
 cProfile.run('test()')
 ```
 ***
->结果太长，实际演示
+>##结果太长，实际演示
 ```shell
 ncalls：表示函数调用的次数；
 tottime：表示指定函数的总的运行时间，除掉函数中调用子函数的运行时间；
@@ -251,21 +259,74 @@ python  kernprof.py   -l  -v  line_profiler_test.py
 
 #2. 内存分析
 
-##2.1 内存占用变化memory_profiler
+##2.1 宏观分析memory_profiler
 现在机器学习和深度学习很火热，很多学习任务比较吃内存，memory_profiler这种场景下可以起到一定作用
 
 - 安装
 ```python
 pip install memory_profiler
+pip install psutil
+pip install matplotlib# 如果出现安装失败的情况，先更新pip: pip install --upgrade pip
 ```
-- 使用
+- 命令行使用
+
+```python
+#memory_profiler_test0.py
+@profile
+def my_func():
+	a = [1] * (10 ** 6)
+	b = [2] * (2 * 10 ** 7)
+	del b
+	return a
+if __name__ == '__main__':
+	my_func()
+```
 
 ```python
 python -m memory_profiler memory_profiler_test.py
 ```
 - 效果
   ![](pics\memory_profiler.png)
-##2.2 ”内存泄漏“objgraph
+
+- 在Python脚本中使用
+```Python
+#memory_profiler_test1.py
+from memory_profiler import profile
+@profile
+def my_func():
+    a = [1] * (10 ** 6)
+    b = [2] * (2 * 10 ** 7)
+    del b
+    return a
+if __name__ == '__main__':
+	my_func()
+```
+- 效果
+
+  直接运行和命令行增加 -m memory_profiler方式的效果相同。
+
+- mprof 基于时间的内存测量
+
+```Shell
+  python mprof run xxx.py
+  python mprof plot
+```
+```python
+#2.1_mprof_test.py
+import time
+def my_func():
+	a = [1] * (10 ** 6)
+	b = [2] * (2 * 10 ** 7)
+	del b
+	return a
+if __name__ == '__main__':
+	for i in xrange(15):
+		my_func()
+		time.sleep(0.1)
+```
+- 效果
+  ![](pics\mprof.png)
+##2.2 微观分析objgraph
 
 
 - 安装
@@ -273,31 +334,12 @@ python -m memory_profiler memory_profiler_test.py
   ```PYTHON
   pip install objgraph
   ```
-  ​
 
-  > 首先明确一个点，python中的内存问题相比于C和C++少很多。
-  >
-  > C或者C++内存管理由开发者负责，Python中内存管理是由Python解释器负责，所以开发人员从内存事务中解脱出来，使得错误更少，程序更健壮，开发周期更短。
 
-+ Python 垃圾回收算法：
-
-  - 引用计数
-  - 标记清除
-  - 分代回收
-
-- python可能出现的内存泄漏：
-  (1)所用到的用 C 语言开发的底层模块中出现了内存泄漏
+- python可能出现的内存问题：
+  (1)所用到的用 C 语言开发的底层模块中出现了内存问题
 
   (2)代码中用到了全局的 list、 dict 或其它容器，不停的往这些容器中插入对象，而忘记了在使用完之后进行删除回收
-
-- 借助pdb调试，常用的pdb命令
-
-  p(print) 查看一个变量值 
-  n(next) 下一步
-  s(step) 单步,可进入函数
-  c(continue)继续前进
-  l(list)看源代码
-
 
 
 ```python
@@ -320,30 +362,49 @@ def test():
 if __name__ == '__main__':
 	test()
 ```
+- 借助pdb调试，常用的pdb命令
+
+  p(print) 查看一个变量值 
+  n(next) 下一步
+  s(step) 单步,可进入函数
+  c(continue)继续前进
+  l(list)看源代码
 ***
 	#显示距离上次执行此命令之间生成的对象
 	objgraph.show_growth()
 #3. 可视化工具
 ##3.1 log分析Runsnakerun
 
--安装
-依赖wxpython
-可以直接在网页上下载安装包,这里介绍下choco下的安装：
+- 安装
+  依赖wxpython
+  可以直接在网页上下载安装包,这里介绍下choco下的安装：
 + 安装choco
 
-    安装powshell，然后在cmd命令下输入下边的命令
+    高版本的windows都带powershell，直接在cmd命令下输入下边的命令
 ```shell
   @powershell -NoProfile -ExecutionPolicy Bypass -Command "iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))" && SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"
 ```
+choco安装完毕，执行下边这个命令就能安装wxpython。
 ```shell
 choco install wxpython
 ```
+然后安装runsnakerun
+```shell
+pip install runsnakerun
+```
+
+安装完之后会生成一个runsnake.py
+
+
 - 使用
   python  runsnake.py  result.prf
+
+
 ##3.2 可视化工具pycallgraph
 
 安装过程略(依赖graphviz)
 ```python
+#code2pycallGraph.py
 from pycallgraph import PyCallGraph
 from pycallgraph.output import GraphvizOutput
 
