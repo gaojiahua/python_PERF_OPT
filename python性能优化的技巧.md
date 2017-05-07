@@ -1,7 +1,13 @@
 #Python性能优化技巧及原理
 ​															stevegao(高家华)
 ***
+ > #*课程介绍*
+ 1. Python性能分析
+ 2. Python性能优化的技巧
+ 3. Python性能优化实践
+
 #1. 少造轮子
+
 少造轮子的意思是尽量不要在python上写库函数已经提供的算法
 ##1.1 二分查找
 二分查找是大家比较容易接触到的一个算法，应用也很广泛。
@@ -40,7 +46,7 @@ print "=> bisect: %s s" % t.secs
 - ### 测试结果:
   ![](pics\bisect.png)
 ***
-- ### **###原因分析###**:
+- ### **原因分析**:
 
   + **源码分析  Python-src\Modules\_bisectmodule.c**
   + **python调试演示**
@@ -204,7 +210,6 @@ set([1, 2, 4, 9])#set 没有重复项
 
 ​      ![](pics\list_append.png)
 
-​       ![](pics\list_comprehension.png) 
 ##2.4 循环优化
 
 - ### 一般写法
@@ -218,9 +223,74 @@ for x in xrange(0, 100):
 ```python
 map(doSomethingWithX, xrange(0,100))
 ```
+- 性能对比
+
+  ```Python
+  #map_test.py
+  from timer import *
+
+  MAX = 1000000
+  def doSomethingWithX(x):
+  	y = x*x
+  with Timer() as t:
+  	for x in xrange(0, MAX):
+  		doSomethingWithX(x)
+  print "xrange %s"%t.secs
+
+  with Timer() as t:
+  	map(doSomethingWithX, xrange(0,MAX))
+  print "map %s"%t.secs
+  ```
+
+  ***
+
+  ![](pics\map_test.png)
+
 ##2.5 //todo生成器
+
 //TODO
 #3. python脚本运行方式
 
+区分两个名词
+
+CPython
+
+Cython
+
 ##3.1 pypy
+
+PyPy是Python实现的Python解释器。
+
+-   主要特性：速度
+                PyPy的一个主要特性是对普通Python代码运行速度的优化。这是由于它使用JIT（Just-in-time）编译器。
+
+-   常见的代码执行方式  ​
+    + 编译执行
+    + 解释执行
+
++ 其他特性
+
+  + 内存占用
+  + 沙盒
+  + 无栈特性
+
+- 安装 
+
+  http://pypy.org/download.html
+
+- 使用
+
+```Python
+python xxx.py
+pypy xxx.py
+```
+
+- 速度测试对比
+
+  //todo
+
 ##3.2 Cython
+
+#4. 极速数据处理
+##4.1 Numba
+##4.2 pandas
