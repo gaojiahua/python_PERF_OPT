@@ -311,8 +311,10 @@ if __name__ == '__main__':
   python mprof run xxx.py
   python mprof plot
 ```
+
+
 ```python
-#2.1_mprof_test.py
+#mprof_test.py
 import time
 def my_func():
 	a = [1] * (10 ** 6)
@@ -377,17 +379,8 @@ if __name__ == '__main__':
 
 - 安装
   依赖wxpython
-  可以直接在网页上下载安装包,这里介绍下choco下的安装：
-+ 安装choco
+  可以直接在网页上下载安装包https://www.wxpython.org/（注意区分64位和32位要和安装的Python版本对应）
 
-    高版本的windows都带powershell，直接在cmd命令下输入下边的命令
-```shell
-  @powershell -NoProfile -ExecutionPolicy Bypass -Command "iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))" && SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"
-```
-choco安装完毕，执行下边这个命令就能安装wxpython。
-```shell
-choco install wxpython
-```
 然后安装runsnakerun
 ```shell
 pip install runsnakerun
@@ -402,7 +395,12 @@ pip install runsnakerun
 
 ##3.2 可视化工具pycallgraph
 
-安装过程略(依赖graphviz)
+依赖graphviz，网上下载安装包http://www.graphviz.org/，安装完成后把安装路径的bin文件夹路径添加到环境变量中。
+
+然后pip安装pycallgraph，pip install pycallgraph
+
+- python脚本内使用
+
 ```python
 #code2pycallGraph.py
 from pycallgraph import PyCallGraph
@@ -413,3 +411,9 @@ with PyCallGraph(output=GraphvizOutput()):
 ```
 ***
 ![](pics\pycallgraph.png)
+
+- 命令行使用
+
+```shell
+python pycallgraph graphviz -- xxx.py
+```

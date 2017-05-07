@@ -333,37 +333,25 @@ python可能出现的内存问题：
 #3. 可视化工具
 ## 3.1 Runsnakerun
 
-- 安装
+### 安装
 
-  由于Runsnakerun需要依赖GUI界面库wxpython，所以先装这个GUI库。
-  这里介绍下使用choco安装wxpython：
+由于Runsnakerun需要依赖GUI界面库wxpython，所以先装这个GUI库。
 
-  choco是windows下的包管理器，类似于Ubuntu下的apt-get。
+​	wxpython不适合使用pip安装，可以去官网下载安装包，注意要区分64位和32位版本，否则无法正常运行runsankerun。32位系统只能装32位版本，64位系统建议大家装64的python，wxpython库也装64位的，免得出莫名其妙的问题。
 
+​	wxpython装好后，可以用pip装runsnakerun
 
-- 安装choco
+​	runsnakerun安装完毕会生成一个runsnake.py
 
-    安装powshell，然后在cmd命令下输入下边的命令
+### 使用
 
-  ```shell
-    @powershell -NoProfile -ExecutionPolicy Bypass -Command "iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))" && SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"
-  ```
-  ```shell
-  choco install wxpython
-  ```
+python  runsnake.py  result.prf
 
-  ​choco不仅仅可以安装wxpython，还能装很多东西，我觉得挺好用的，给大家推荐下。
-
-  ​
-
-- 使用
-  python  runsnake.py  result.prf
-
-  runsnake.py 的输入不是一个Python脚本，而是性能分析log，这个log就是我们之前介绍cProfile的时候用-o生成的log。
+runsnake.py 的输入不是一个Python脚本，而是性能分析log，这个log就是我们之前介绍cProfile的时候用-o生成的log。
 
 ### 演示
 
-​	下边我实际操作下
+​	这个是有GUI界面的，演示下会比较清楚
 
 1. 标签介绍
 2. 排序
@@ -376,11 +364,28 @@ python可能出现的内存问题：
 
 
 
-  ​
+  
 
 ## 3.2 pycallgraph
 
+### 安装
 
+依赖graphviz，网上下载安装包http://www.graphviz.org/，安装完成后把安装路径的bin文件夹路径添加到环境变量中。
 
+然后pip安装pycallgraph，pip install pycallgraph
 
+### 使用
 
+  pycallgraph在python脚本中使用，看下边代码，和我们之前自己封装的那么timer类似，使用了with关键字来对待测代码和函数进行性能测试。
+
+  ​
+
+  我这里只是展示一下用法，如果在实际使用中，不要去改待测试脚本，把待测试脚本import进来，单独写一个测试脚本。
+
+### 演示
+
+  ```
+  python pycallgraph graphviz -- python_time_test0.py
+  ```
+
+  ​
