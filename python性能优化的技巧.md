@@ -3,11 +3,14 @@
 ***
  > #*课程介绍*
 1.  Python性能分析
+
 2.  Python性能优化的技巧
+
 3.  Python性能优化实践
+
 > #*背景知识*
-* 适当的Python编码知识
-* 常用的Python性能分析方法
+* 适当的Python开发基础
+* 常用Python性能分析工具和方法
 * 少量的C语言代码阅读调试知识
 
 #1. 少造轮子
@@ -165,7 +168,7 @@ Python-2.7.9-src\Objects\rangeobject.c (下列三幅图，都来自此文件)
 
 ![](pics\xrange_better.png)
 
-##2.3 推导式
+##2.3 循环优化
 
 - ### 将列表中的所有单词变成大写的一般写法
 ```python
@@ -173,7 +176,7 @@ newlist = []
 for word in oldlist:
     newlist.append(word.upper())
 ```
-- ### 使用列表推导
+### 2.3.1列表推导
 ```python
 newlist = [s.upper() for s in oldlist]
 ```
@@ -224,43 +227,120 @@ List_Append调用栈比较：
 
 ![](pics\list_append_callstack.png)
 
-##2.4 循环优化
+### 2.3.2 map函数
 
-- ### 一般写法
-```python
-for x in xrange(0, 100):
-    doSomethingWithX(x)
-```
-***
-- ### 进行优化
+* ###  进行优化
   map()接收一个函数 f 和一个 list，并通过把函数 f 依次作用在 list 的每个元素上，得到一个新的 list 并返回
+
 ```python
 map(doSomethingWithX, xrange(0,100))
 ```
-- 性能对比
+- ###功能对比
 
   ```Python
   #map_test.py
-  from timer import *
+  oldlist =  ['Bob','Tom','alice','Jerry','Wendy','Smith']
+  newlist = []
+  for word in oldlist:
+  	newlist.append(word.upper())
+  print newlist
 
-  MAX = 1000000
-  def doSomethingWithX(x):
-  	y = x*x
-  with Timer() as t:
-  	for x in xrange(0, MAX):
-  		doSomethingWithX(x)
-  print "xrange %s"%t.secs
+  oldlist =  ['Bob','Tom','alice','Jerry','Wendy','Smith']
+  newlist = map(lambda x: x.upper(),oldlist)
+  print newlist
 
-  with Timer() as t:
-  	map(doSomethingWithX, xrange(0,MAX))
-  print "map %s"%t.secs
+  oldlist =  ['Bob','Tom','alice','Jerry','Wendy','Smith']
+  newlist = [s.upper() for s in oldlist]		
+  print newlist
   ```
 
   ***
 
   ![](pics\map_test.png)
 
-##2.5 //todo生成器
+
+
+* 原因分析
+
+  原理和列表推导类似
+
+### 2.3.3 两种方式的优劣
+- 继续转成大写字母的例子
+```Python
+#map_test2.py
+from timer import *
+
+MAX = 5000000
+
+with Timer() as t:
+	for i in xrange(MAX):
+	
+		oldlist =  ['Bob','Tom','alice','Jerry','Wendy','Smith']
+		newlist = []
+		for word in oldlist:
+			newlist.append(word.upper())
+			
+print "for %s"%t.secs
+
+with Timer() as t:
+	for i in xrange(MAX):
+	
+		oldlist =  ['Bob','Tom','alice','Jerry','Wendy','Smith']
+		newlist = map(lambda x: x.upper(),oldlist)
+		
+print "map %s"%t.secs
+
+with Timer() as t:
+	for i in xrange(MAX):
+	
+		oldlist =  ['Bob','Tom','alice','Jerry','Wendy','Smith']
+		newlist = [s.upper() for s in oldlist]
+		
+print "list compre %s"%t.secs
+```
+
+***
+
+![](pics\map_lambda.png)
+
+- 都使用函数
+```Python
+#map_test3.py
+from timer import *
+
+MAX = 1000000
+
+oldlist =  range(1, 10)
+def doSomethingWithX(x):
+	return x*x
+
+with Timer() as t:
+	for x in xrange(0, MAX):
+		newlist = []
+		for x in  oldlist:
+			newlist.append(doSomethingWithX(x))
+print "for %s"%t.secs
+
+with Timer() as t:
+	for x in xrange(0, MAX):
+		newlist =  map(doSomethingWithX,  oldlist)
+print "map %s"%t.secs
+
+with Timer() as t:
+	for x in xrange(0, MAX):
+		newlist = [doSomethingWithX(i) for i in  oldlist]
+print "list compre %s"%t.secs
+```
+
+***
+
+![](pics\map_func.png)
+
+- 结论
+  + 如果使用同样的函数，map速度更快
+  + 但列表推导的语法更灵活，简单表达式速度更好
+
+##2.4 //todo生成器
 
 //TODO
 #3. python脚本运行方式
@@ -276,7 +356,7 @@ Cython
 PyPy是Python实现的Python解释器。
 
 -   主要特性：速度
-                    PyPy的一个主要特性是对普通Python代码运行速度的优化。这是由于它使用JIT（Just-in-time）编译器。
+                                      PyPy的一个主要特性是对普通Python代码运行速度的优化。这是由于它使用JIT（Just-in-time）编译器。
 
 -   常见的代码执行方式  ​
     + 编译执行
