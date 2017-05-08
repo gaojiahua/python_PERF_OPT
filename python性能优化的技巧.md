@@ -2,9 +2,13 @@
 ​															stevegao(高家华)
 ***
  > #*课程介绍*
- 1. Python性能分析
- 2. Python性能优化的技巧
- 3. Python性能优化实践
+1.  Python性能分析
+2.  Python性能优化的技巧
+3.  Python性能优化实践
+> #*背景知识*
+* 适当的Python编码知识
+* 常用的Python性能分析方法
+* 少量的C语言代码阅读调试知识
 
 #1. 少造轮子
 
@@ -200,6 +204,10 @@ S = {len(s) for s in strings}
 >>>S
 set([1, 2, 4, 9])#set 没有重复项
 ```
+- ### 性能比较
+
+  ![](pics\List_compre_prof.png)
+
 - ### 原因分析
 
   之前的几次性能分析都是使用源码和调试的方式，这次换一种分析方式，字节码比较。
@@ -208,7 +216,13 @@ set([1, 2, 4, 9])#set 没有重复项
   python -m dis xxx.py
   ```
 
-​      ![](pics\list_append.png)
+​      字节码比较：![](pics\list_append.png)
+
+
+
+List_Append调用栈比较：
+
+![](pics\list_append_callstack.png)
 
 ##2.4 循环优化
 
@@ -262,7 +276,7 @@ Cython
 PyPy是Python实现的Python解释器。
 
 -   主要特性：速度
-                PyPy的一个主要特性是对普通Python代码运行速度的优化。这是由于它使用JIT（Just-in-time）编译器。
+                    PyPy的一个主要特性是对普通Python代码运行速度的优化。这是由于它使用JIT（Just-in-time）编译器。
 
 -   常见的代码执行方式  ​
     + 编译执行
