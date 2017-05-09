@@ -428,8 +428,9 @@ Cython
 
 PyPy是Python实现的Python解释器。
 
--   主要特性：速度
-      PyPy的一个主要特性是对普通Python代码运行速度的优化。这是由于它使用JIT（Just-in-time）编译器。
+-   主要特性
+    **速度**
+    PyPy的一个主要特性是对普通Python代码运行速度的优化。这是由于它使用JIT（Just-in-time）编译器。
 
 -   常见的代码执行方式  
     + 编译执行
@@ -475,7 +476,46 @@ print "=> elasped : %s s" % t.secs
 
   http://cython.org/#download
 
+  pip install Cython
+
   ​
+
+- 使用
+
+```Python
+#Cython_compute.pyx
+def test():
+  	for i in xrange(100000):
+  		rs = 0
+  		for i in xrange(1000):
+  			rs += i
+```
+***
+```Python
+#setup.py
+from distutils.core import setup
+from Cython.Build import cythonize
+setup(name = 'Cpython_test app',
+      ext_modules = cythonize("Cython_compute.pyx"))
+```
+***
+```Shell
+python setup.py build
+python setup.py install
+```
+```Python
+#Cython_test.py
+from timer import Timer
+from Cython_compute import *
+if __name__ == '__main__':
+	with Timer() as t:
+		test()
+	print "Cython %s"%t.secs
+```
+
+- 性能对比
+
+  ![](pics\Cython_test.png)
 
 #4. 进入Python底层
 
