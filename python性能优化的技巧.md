@@ -15,7 +15,8 @@
 
 #1. 少造轮子
 
-少造轮子的意思是尽量不要在python上写库函数已经提供的算法
+Python的标准库核心组件大都是用经过优化的C语言写成的。因此不需要你自建，而且你自建的很可能会更慢。使用Python给定的数据结构，列表、元组、集合和字典这些数据类型，不要去在Python层去自定义。使用Python核心库组件的算法，少造轮子。
+
 ##1.1 二分查找
 二分查找是大家比较容易接触到的一个算法，应用也很广泛。
 - ### 一个轮子：
@@ -215,6 +216,8 @@ set([1, 2, 4, 9])#set 没有重复项
 
   之前的几次性能分析都是使用源码和调试的方式，这次换一种分析方式，字节码比较。
 
+  Python虽然是一个解释型语言，但是代码最终还是会编译成字节码，字节码需要处理才能被理解，dis模块把字节码转换成人能读懂的形式，然后我们进行分析。
+
   ```python
   python -m dis xxx.py
   ```
@@ -340,9 +343,79 @@ print "list compre %s"%t.secs
   + 如果使用同样的函数，map速度更快
   + 但列表推导的语法更灵活，简单表达式速度更好
 
-##2.4 //todo生成器
 
-//TODO
+## 2.4 其他技巧
+
+- 文件处理
+
+  ```Python
+  fobj = open("data.txt")
+  lines = fobj.readlines()#当文件较大时，消耗内存
+  for line in  lines:
+      doSomethingWith(line)
+  ```
+  ***
+  ```Python
+  with open("data.txt") as  f:
+      for line in  f:
+          doSomethingWith(line)
+  ```
+
+  ***
+
+  ![](pics\open_test.png)
+
+- 在处理大列表的时候，可以使用生成器来动态生成列表元素
+```Python
+#my_struct = (x**2 for x in range(100))
+my_stucct =  [x**2 for x in range(100)]
+for number in my_struct:
+    doSomethingWith(number) 
+```
+
+- 成员关系测试，多用in；查询交集并集等操作，先转换成集合
+
+  ```Python
+  from timer import *
+
+  MAX =  10000000
+  my_list = ['a','b','is','python','jason','hello','hill','with','phone','test', 
+  'dfdf','apple','pddf','ind','basic','none','baecr','var','bana','dd','wrd']
+  key = "blue"
+  def test():
+  	with Timer() as t:
+  		for i in xrange(MAX):
+  			rs = False
+  			for item in my_list:
+  				if key == item:
+  					rs =  True
+  					break
+  	print  "for if %s" % t.secs
+
+  	with Timer() as t:
+  		for i in xrange(MAX):
+  			rs = False
+  			if key in my_list:
+  				rs =  True
+  	print  "list in %s" % t.secs
+  	
+  	myset = set(my_list)
+  	with Timer() as t:
+  			for i in xrange(MAX):
+  				rs = False
+  				if key in myset:
+  					rs =  True
+  	print  "set in %s" % t.secs
+  ```
+
+  ***
+
+  ![](pics\member_test.png)
+
+- 密集循环内，减少函数调用，直接内联代码，可以更加高效，但代价是损害代码的可读性和维护便利性
+
+
+
 #3. python脚本运行方式
 
 区分两个名词
@@ -356,9 +429,9 @@ Cython
 PyPy是Python实现的Python解释器。
 
 -   主要特性：速度
-                                      PyPy的一个主要特性是对普通Python代码运行速度的优化。这是由于它使用JIT（Just-in-time）编译器。
+      PyPy的一个主要特性是对普通Python代码运行速度的优化。这是由于它使用JIT（Just-in-time）编译器。
 
--   常见的代码执行方式  ​
+-   常见的代码执行方式  
     + 编译执行
     + 解释执行
 
@@ -380,11 +453,43 @@ pypy xxx.py
 ```
 
 - 速度测试对比
-
-  //todo
-
+```Python
+#pypy_test.py
+from timer import Timer
+with Timer() as t:
+	for i in xrange(100000):
+		rs = 0
+		for i in xrange(1000):
+			rs += i
+print "=> elasped : %s s" % t.secs
+```
+***
+![](pics\pypy_test.png)
 ##3.2 Cython
 
-#4. 极速数据处理
-##4.1 Numba
-##4.2 pandas
+将Python源代码转换成c语言代码，然后再从c代码编译成2进制程序
+
+![](pics\Cython.jpg)
+
+- 安装
+
+  http://cython.org/#download
+
+  ​
+
+#4. 进入Python底层
+
+## 4.1 ctypes
+
+ctypes库可以让开发者直接进入Python的底层，借助C语言的力量进行开发。这个库只有官方版本解释器（CPython）里面才有，因为这个版本是C语言写的。
+
+- ### 加载自定义的ctypes
+
+  有时，无论我们在代码上用了多少优化方法，可能都没法儿满足我们对性能的要求。这时我们可以把关键代码写成C语言，编译成一个库，然后导入Python当作模块使用。
+
+#5. 极速数据处理
+
+##5.1 Numba
+
+
+##5.2 pandas
