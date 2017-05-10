@@ -102,16 +102,30 @@ Python-src\Objects\listobject.c		 PyList_Sort
 ```python
 #join_test.py
 import timer
-jlist = ["a",  "b"]
+jlist_long = ["a",  "b", "a",  "b","a",  "b","a",  "b","a",  "b" ]
+jlist_short =  ["a",  "b"]
+MAX_RANGE =  10 * 1000 * 1000
 def test_join0():
-	for i in xrange(100*1000*1000):
-		rs =  jlist[0] + jlist[1]
+	for i in xrange(MAX_RANGE):
+		rs =  "a" + "b"
 
 def test_join1():
-	for i in xrange(100*1000*1000):
-		rs =  "".join(jlist)
+	for i in xrange(MAX_RANGE):
+		rs =  "".join(jlist_short)
+
+def test_join2():
+	for i in xrange(MAX_RANGE):
+			rs = jlist_long[0] +  jlist_long[1] +  jlist_long[2] +  jlist_long[3] +  jlist_long[4] +  jlist_long[5] +  jlist_long[6] +  jlist_long[7] + jlist_long[8] + jlist_long[9]
+
+def test_join3():
+	for i in xrange(MAX_RANGE):
+			rs =  "".join(jlist_long)
 ```
-- ### ###性能测试展示######
+- ### 性能测试展示######
+  ![](pics\string_join_test.png)
+- 结论
+  + 简短的字符串连接，可以用+
+  + 连接一个list用join
 ***
 - ### 源代码分析:    
 
@@ -123,17 +137,9 @@ def test_join1():
 join连接字符串  Python-2.7.9-src\Objects\stringobject.c  -> string_join
    ![](pics\string_join.png)
 
-- ### "+" 效率不好的情况:
-```python
-s = ""
-for x in somelist:
-    s += x
-```
-- ### 适合用join:
-```python
-s = "".join(slist)
-```
-##2.2 range和xrange（python3不适用）
+## 2.2 range和xrange（python3不适用）
+
+
 - ### 效率不好的语法
 
 ```python
@@ -365,6 +371,8 @@ print "list compre %s"%t.secs
 
   ![](pics\open_test.png)
 
+  ​
+
 - 在处理大列表的时候，可以使用生成器来动态生成列表元素
 ```Python
 #my_struct = (x**2 for x in range(100))
@@ -372,6 +380,8 @@ my_stucct =  [x**2 for x in range(100)]
 for number in my_struct:
     doSomethingWith(number) 
 ```
+
+
 
 - 成员关系测试，多用in；查询交集并集等操作，先转换成集合
 
@@ -412,6 +422,8 @@ for number in my_struct:
 
   ![](pics\member_test.png)
 
+  ​
+
 - 密集循环内，减少函数调用，直接内联代码，可以更加高效，但代价是损害代码的可读性和维护便利性
 
 
@@ -424,29 +436,39 @@ CPython
 
 Cython
 
-##3.1 pypy
+##3.1 PyPy
 
 PyPy是Python实现的Python解释器。
 
--   主要特性
-    **速度**
-    PyPy的一个主要特性是对普通Python代码运行速度的优化。这是由于它使用JIT（Just-in-time）编译器。
+
+
+-   主要特性-速度
+
+PyPy的一个主要特性是对普通Python代码运行速度的优化。这是由于它使用JIT（Just-in-time）编译器。
+
+
 
 -   常见的代码执行方式  
     + 编译执行
+
     + 解释执行
 
-+ 其他特性
+      ​
+-   JIT
 
-  + 内存占用
-  + 沙盒
-  + 无栈特性
+JIT技术是两者的结合，首先让代码解释执行，同时收集信息，在收集到足够信息的时候，将代码动态编译成CPU指令，然后用CPU指令替代解释执行的过程，因为编译发生在马上要执行之前，所以叫做Just-In-Time Compiler。编译之后速度就是编译执行的速度了，比解释执行要快得多，所以运用JIT的PyPy很多情况下会比普通的CPython要快。
+-   其他特性
 
-- 安装 
+    + 内存占用
+    + 沙盒
+    + 无栈特性
 
-  http://pypy.org/download.html
+-   安装 
 
-- 使用
+不是一个Python模块，而是另一个Python解释器
+http://pypy.org/download.html
+
+-   使用
 
 ```Python
 python xxx.py
@@ -501,6 +523,7 @@ setup(name = 'Cpython_test app',
 ***
 ```Shell
 python setup.py build
+#如果windows下build失败，升级python至最新版本，升级setuptools至最新版本，从vs（测试使用vs2012）本地命令行进入，SET VS90COMNTOOLS=%VS110COMNTOOLS%
 python setup.py install
 ```
 ```Python
@@ -517,7 +540,19 @@ if __name__ == '__main__':
 
   ![](pics\Cython_test.png)
 
+
+## 3.3 没有银弹
+通过上面的测试会发现pypy的能力是无与伦比的
+
+但是**操作数字的小程序是比较容易被优化**
+
+demo测试的结论无法代表实际项目中的效果，实际项目中PyPy和Cython不一定普通的Python会快。
+
+
+
 #4. 进入Python底层
+
+单纯的从脚本运行方式上下手不是绝对稳妥，但是走向底层绝对不会错。
 
 ## 4.1 ctypes
 
@@ -526,10 +561,112 @@ ctypes库可以让开发者直接进入Python的底层，借助C语言的力量�
 - ### 加载自定义的ctypes
 
   有时，无论我们在代码上用了多少优化方法，可能都没法儿满足我们对性能的要求。这时我们可以把关键代码写成C语言，编译成一个库，然后导入Python当作模块使用。
+```C
+//dll2ctypes.cpp
+int WINAPI c_check_prime(int a)
+{
+	int c;
+	for ( c = 2 ; c <= sqrt((float)a) ; c++ ) {
+		if ( a%c == 0 )
+			return 0;
+	}
+	return 1;
+}
+```
+***
+```Python
+#ctypes_test.py
+import math
+from timer import *
+import ctypes
 
-#5. 极速数据处理
+MAX = 1000000
+def check_prime(x):
+    values = xrange(2, int(math.sqrt(x)))
+    for i in values:
+        if x % i == 0:
+            return False
+    return True
+	
+c_check_prime = ctypes.CDLL(r'.\ctypes\dll2ctypes\x64\Release\dll2ctypes.dll').c_check_prime
 
-##5.1 Numba
 
+with Timer() as t:
+	numbers_py = [x for x in xrange(MAX) if check_prime(x)]
+print "python %s"%t.secs
 
-##5.2 pandas
+with Timer() as t:
+	numbers_py = [x for x in xrange(MAX) if c_check_prime(x)]
+print "ctypes %s"%t.secs
+```
+- 性能对比结果
+
+  ![](pics\ctypes_test.png)
+
+## 4.2 SWIG
+
+SWIG是一种软件开发工具。它能让一些脚本语言调用C/C++语言的接口。
+
+- 安装
+
+  下载地址[http://www.swig.org/download.html](http://www.swig.org/download.html)
+
+- 简单例子
+```C
+/* File : example.c */  
+double  My_variable  = 3.0;   
+/* Compute factorial of n */  
+int  fact(int n) {  
+    if (n <= 1) return 1;  
+    else return n*fact(n-1);  
+}  
+/* Compute n mod m */  
+int my_mod(int n, int m) {  
+    return(n % m);  
+}  
+```
+
+你想在你的脚本语言的代码里面调用fact函数。先写一段非常简单的SWIG脚本，文件名为example.i：
+```C
+/* File : example.i */  
+%module example  
+%{  
+/* Put headers and other declarations here */  
+extern double My_variable;  
+extern int    fact(int);  
+extern int    my_mod(int n, int m);  
+%}   
+extern double My_variable;  
+extern int    fact(int);  
+extern int    my_mod(int n, int m);  
+```
+
+***
+
+```Python
+#setup.py
+from distutils.core import setup, Extension
+setup(name='example',
+      version='1.0.0',
+      description='Simple SWIG example ',
+      ext_modules=[Extension('_example', sources=['example.c', 'example.i'])]
+      )
+```
+
+***
+
+- 编译
+
+  类似之前的Cython编译
+```shell
+python setup.py build_ext --inplace
+```
+- 运行
+```Python
+import example 
+print example.fact(4)  
+print example.my_mod(23,7)
+print example.cvar.My_variable + 4.5  
+```
+
+![](pics\swig_rs.png)
