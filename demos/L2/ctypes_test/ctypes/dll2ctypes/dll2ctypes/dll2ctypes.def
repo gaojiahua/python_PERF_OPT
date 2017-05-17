@@ -1,0 +1,5 @@
+LIBRARY	"dll2ctypes"
+
+EXPORTS;
+c_Add @1
+c_check_prime @2
