@@ -4,7 +4,14 @@
 
 ***
 
+***
+ > #*课程介绍*
+ 1. Python性能分析
+ 2. Python性能优化的技巧
+ 3. Python性能优化实践
+
 ##1. 真假多线程
+
 开发多线程的应用程序，是日常软件开发中经常会遇到的需求。
 
 ### Python支持多线程threading模块
@@ -111,8 +118,27 @@ multiprocessing可以绕过GIL锁实现真正的并发，但是创建进程这�
 | 子进程容易中断（killable）   | IPC（Interprocess communication，进程间通信）处理比线程困难 |
 
 
+### 进程池
+
+![](pics\processesPool.png)
+```Python
+#import multiprocessing
+g_inputq = multiprocessing.JoinableQueue(QUEUEMAXSIZE)
+g_outputq = multiprocessing.JoinableQueue(QUEUEMAXSIZE)
+#初始化进程池
+for i in range(0, POOLSIZE):
+        t = multiprocessing.Process(target=Distribute, args=(g_inputq,g_outputq))
+        t.daemon = True
+        t.start()
+```
+
+核心在于处理进程间通信，加上socket通信，可以搭建一个简单的分布式系统
 
 
+
+- 注意事项
+
+  ​
 
 ##2. JSON解析
 
@@ -258,7 +284,23 @@ print "tldextract %s"%t.secs
 ```Python
 python -m cProfile -o tld.prof tldextract_test.py
 ```
+- runsnake
 
+  依赖wxpython
+  可以直接在网页上下载安装包https://www.wxpython.org/（注意区分64位和32位要和安装的Python版本对应）
+
+然后安装runsnakerun
+```shell
+pip install runsnakerun
+```
+
+安装完之后会生成一个runsnake.py
+
+
+- 使用
+```Python
+  python  runsnake.py  xxxx.prof
+```
 ![](pics\tldprof.png)
 
 Python27\Lib\site-packages\tldextract\\.tld_set
@@ -269,12 +311,16 @@ Python27\Lib\site-packages\tldextract\\.tld_set_snapshot
 
   从耗时分析入手，找到程序运营不正常的原因
 
+
+
 ##4. simhash算法
 
 ### 原理
 
 ![](pics\simhash.png)
 ![](pics\simhash2.png)
+
+### 代码
 ```Python
 from hashtype import hashtype
 
@@ -332,3 +378,8 @@ class simhash(hashtype):
             raise Exception('Hashes must be of equal size to find similarity')
         return float(b - self.hamming_distance(other_hash)) / b
 ```
+
+### 优化
+使用C/C++版本
+
+![](pics\simhash_cpp.png)
