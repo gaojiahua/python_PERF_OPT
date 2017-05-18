@@ -9,8 +9,39 @@
  1. Python性能分析
  2. Python性能优化的技巧
  3. Python性能优化实践
+##1. 避免重复计算
+### 代码
+```Python
+#lcm_test0.py
+def lowest_common_multiplier(arg1, arg2):
+    i = max(arg1, arg2)
+    while i < (arg1 * arg2):
+        if i % min(arg1, arg2) == 0:
+            return i
+        i += max(arg1, arg2)
+    return(arg1 * arg2)
 
-##1. 真假多线程
+print lowest_common_multiplier(41391237, 2830338)
+```
+***
+```Python
+#lcm_test1.py
+def lowest_common_multiplier(arg1, arg2):
+    i = max(arg1, arg2)
+    _max = i
+    _min = min(arg1,arg2)
+    while i < (arg1 * arg2):
+        if i % _min == 0:
+            return i
+        i += _max
+    return(arg1 * arg2)
+
+print lowest_common_multiplier(41391237, 2830338)
+```
+### 测试
+![](pics\lcm_test.png)
+
+##2. 真假多线程
 
 开发多线程的应用程序，是日常软件开发中经常会遇到的需求。
 
@@ -57,6 +88,14 @@ if __name__ == "__main__":
 （Global Interpreter Lock）全局解释器锁
 
   Python解释器被GIL保护，该锁定只允许一次执行一个线程，即便存在多个可用的处理器。在计算型密集的程序中，严重限制了线程的作用。实际上，就像上边我们看到的那样，在密集计算型程序中使用多线程，经常比顺序执行慢很多。
+缺点：
+  1. 不顺应计算机的发展潮流
+  2. 限制多线程程序的速度
+
+存在的理由：
+  1. 写python的扩展(module)时会遇到锁的问题,程序员需要繁琐地加解锁来保证线程安全
+  2. 会较大幅度地减低单线程程序的速度
+
 
 ### threading模块的意义何在
 既然多线程会慢，那么threading模块的存在的意义是什么
@@ -140,7 +179,7 @@ for i in range(0, POOLSIZE):
 
   ​
 
-##2. JSON解析
+##3. JSON解析
 
 JSON文件解析是日常工作比较常见的一个任务。
 
@@ -244,7 +283,7 @@ print  "simplejson loads %s" % t.secs
 >
 
 
-##3. URL中提取域名
+##4. URL中提取域名
 
 前段时间一个网址安全检测的项目里边需要从网址中提取域名，eg : http://sports.qq.com/a/20170511/003170.htm，域名就是qq.com。看起来挺简单的一个算法，Python中也有专门的库，tldextract。
 
@@ -313,7 +352,7 @@ Python27\Lib\site-packages\tldextract\\.tld_set_snapshot
 
 
 
-##4. simhash算法
+##5. simhash算法
 
 ### 原理
 
@@ -383,3 +422,37 @@ class simhash(hashtype):
 使用C/C++版本
 
 ![](pics\simhash_cpp.png)
+
+## 6. 极速数据处理
+
+### Numba
+
+Numba（http://numba.pydata.org/）是一个模块，让你能够（通过装饰器）控制Python解释器把函数转变成机器码。因此，Numba实现了与C和Cython同样的性能，但是不需要用新的解释器或者写C代码。
+
+这个模块可以按需生成优化的机器码，甚至可以编译成CPU或GPU可执行代码。
+
+```Python
+#numba_test.py
+from numba import jit
+from numpy import arange
+
+# jit装饰器告诉Numba编译函数
+# 当函数被调用时，Numba会把参数类型引入
+@jit
+def sum2d(arr):
+    M, N = arr.shape
+    result = 0.0
+    for i in range(M):
+        for j in range(N):
+            result += arr[i, j]
+    return result
+
+a = arange(9).reshape(3, 3)
+print(sum2d(a))
+```
+
+### 测试
+***
+![](pics\numba_test_cprofile.png)
+***
+![](pics\numba_time_test.png)
