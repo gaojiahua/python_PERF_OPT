@@ -427,6 +427,8 @@ class simhash(hashtype):
 
 ### Numba
 
+#### 概述
+
 Numba（http://numba.pydata.org/）是一个模块，让你能够（通过装饰器）控制Python解释器把函数转变成机器码。因此，Numba实现了与C和Cython同样的性能，但是不需要用新的解释器或者写C代码。
 
 这个模块可以按需生成优化的机器码，甚至可以编译成CPU或GPU可执行代码。
@@ -451,8 +453,71 @@ a = arange(9).reshape(3, 3)
 print(sum2d(a))
 ```
 
-### 测试
+#### 测试
 ***
 ![](pics\numba_test_cprofile.png)
 ***
 ![](pics\numba_time_test.png)
+
+### pandas
+
+#### 311 服务请求数据统计
+
+```Python
+#panda_test.py
+import pandas as pd
+import time
+import csv
+import collections
+
+SOURCE_FILE = './311.csv'
+
+def readCSV(fname):
+    with open(fname, 'rb') as csvfile:
+        reader = csv.DictReader(csvfile)
+        lines = [line for line in reader]
+        return lines
+
+
+def process(fname):
+    content = readCSV(fname)
+    incidents_by_zipcode = collections.defaultdict(int)
+    for record in content:
+        incidents_by_zipcode[toFloat(record['Incident Zip'])] += 1
+    return sorted(incidents_by_zipcode.items(), reverse=True, key=lambda a: int(a[1]))[:10]
+
+
+def toFloat(number):
+    try:
+        return int(float(number))
+    except:
+        return 0
+
+
+def process_pandas(fname):
+    df = pd.read_csv(fname, dtype={
+                     'Incident Zip': str, 'Landmark': str, 'Vehicle Type': str, 'Ferry Direction': str})
+    df['Incident Zip'] = df['Incident Zip'].apply(toFloat)
+    column_names = list(df.columns.values)
+    column_names.remove("Incident Zip")
+    column_names.remove("Unique Key")
+    return df.drop(column_names, axis=1).groupby(['Incident Zip'], sort=False).count().sort('Unique Key', ascending=False).head(10)
+
+init = time.clock()
+total = process(SOURCE_FILE)
+endtime = time.clock() - init
+for item in total:
+    print "%s\t%s" % (item[0], item[1])
+
+print "(Pure Python) time: %s" % (endtime)
+
+init = time.clock()
+total = process_pandas(SOURCE_FILE)
+endtime = time.clock() - init
+print total
+print "(Pandas) time: %s" % (endtime)
+```
+***
+#### 性能对比
+![](pics\panda_test0.png)
+![](pics\panda_test1.png)
